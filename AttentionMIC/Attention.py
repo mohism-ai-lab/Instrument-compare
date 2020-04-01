@@ -157,7 +157,6 @@ class DecisionLevelSingleAttention(nn.Module):
     def forward(self, input):
         """input: (samples_num, freq_bins, time_steps, 1)
         """
-
         # (samples_num, hidden_units, time_steps, 1)
         b1 = self.emb(input)
 

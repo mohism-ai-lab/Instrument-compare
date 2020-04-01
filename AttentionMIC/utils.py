@@ -56,13 +56,20 @@ def cuda(X):
         X = X.cuda()
     return X
 
+def cpu(X):
+    if type(X) is list:
+        X = X[0].cpu(), X[1].cpu()
+    else: 
+        X = X.cpu()
+    return X
+
 def discriminative_trainer(model, data_loader, optimizer, criterion, inst=None):
     model.train()
     loss_tracker = AverageMeter()
     for (X, _, Y_true, Y_mask) in tqdm(data_loader):
-        X = cuda(X)
-        Y_true = Y_true.cuda()
-        Y_mask = Y_mask.cuda()
+        X = cpu(X)
+        Y_true = Y_true.cpu()
+        Y_mask = Y_mask.cpu()
         if inst is not None:
             Y_true = Y_true[:,inst].view(-1,1)
             Y_mask = Y_mask[:,inst].view(-1,1)
@@ -90,7 +97,7 @@ def model_forward(model, data_loader, inst=None):
         n_inst = 20
     all_predictions = torch.Tensor(0, n_inst)
     for (X, _, _, _) in tqdm(data_loader):
-        X = X.cuda()
+        X = X.cpu()
         outputs = model(X)
         all_predictions = torch.cat((all_predictions, outputs.detach().cpu()))
     return torch.sigmoid(all_predictions)
@@ -106,12 +113,13 @@ def discriminative_evaluate(model, data_loader, criterion, inst=None):
     all_y_mask = torch.ByteTensor(0, n_inst)
     all_predictions = torch.Tensor(0, n_inst)
     for (X, _, Y_true, Y_mask) in tqdm(data_loader):
-        X = cuda(X)
-        Y_true = Y_true.cuda()
-        Y_mask = Y_mask.cuda()
+        X = cpu(X)
+        Y_true = Y_true.cpu()
+        Y_mask = Y_mask.cpu()
         if inst is not None:
             Y_true = Y_true[:,inst].view(-1,1)
             Y_mask = Y_mask[:,inst].view(-1,1)
+        print("X.shape=" + str(X.shape))
         outputs = model(X)
         if inst is None:
             loss = criterion(outputs[Y_mask], Y_true[Y_mask])

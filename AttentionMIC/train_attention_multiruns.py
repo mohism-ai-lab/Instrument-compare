@@ -7,6 +7,8 @@ from copy import deepcopy
 import datetime
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
+from torchviz import make_dot
+
 # import sys
 # sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data'))
 # get arguments
@@ -80,7 +82,8 @@ for seed in seeds:
         model = FC_T()
     elif args.model_type == 'RNN':
         model = BaselineRNN_2()
-    model = model.cuda()
+    #model = model.cuda()
+    model = model.cpu()
 
     optimizer = torch.optim.Adam(
             model.parameters(),
@@ -161,6 +164,12 @@ for seed in seeds:
     except KeyboardInterrupt:
         print('Stopping training. Now testing')
 
+    # Write the model
+    #x_write = torch.rand(1, 10, 128)
+    #y_write = model(x_write)
+    #print("y_write=" + str(y_write))
+    #print("x_write.shape=" + str(x_write.shape))
+    #writer.add_graph(model, x_write)
     # Test the model
     for i, model in enumerate(best_models):
         loss, avg_f1_weighted, avg_f1_macro, predictions, avg_p_macro, avg_r_macro = discriminative_evaluate(model, test_loader, criterion)
